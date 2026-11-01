@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class MobileAuthController extends Controller
@@ -116,6 +115,6 @@ class MobileAuthController extends Controller
             return $avatar;
         }
         // Hasil: http://<host>/storage/avatars/x.jpg
-        return Storage::disk('public')->url($avatar);
+        return asset($avatar);
     }
 }
