@@ -115,6 +115,6 @@ class MobileAuthController extends Controller
             return $avatar;
         }
         // Hasil: http://<host>/storage/avatars/x.jpg
-        return asset($avatar);
+        return asset('storage/' . $avatar) ?? null;
     }
 }
