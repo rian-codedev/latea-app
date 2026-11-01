@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class MobileAuthController extends Controller
@@ -94,6 +95,7 @@ class MobileAuthController extends Controller
         return [
             'id'       => $user->id,
             'name'     => $user->name,
+            'avatar_url' => $this->resolveAvatarUrl($user->avatar),
             'email'    => $user->email,
             'role'     => strtolower($user->role?->name ?? ''),
             'store_id' => $user->store_id,
@@ -104,5 +106,16 @@ class MobileAuthController extends Controller
                 'location' => $user->store->location,
             ] : null,
         ];
+    }
+
+    private function resolveAvatarUrl(?string $avatar): ?string
+    {
+        if (empty($avatar)) return null;
+        // Sudah URL absolut (mis. dari S3, Cloudinary, dsb.)
+        if (preg_match('/^https?:\/\//i', $avatar)) {
+            return $avatar;
+        }
+        // Hasil: http://<host>/storage/avatars/x.jpg
+        return Storage::disk('public')->url($avatar);
     }
 }
