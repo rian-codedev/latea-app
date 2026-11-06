@@ -1,6 +1,7 @@
 <?php
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Locked;
 use App\Models\Store;
@@ -8,6 +9,7 @@ use App\Models\Product;
 use App\Models\StoreProduct;
 
 new #[Title('Manage Store Products')] class extends Component {
+    use WithPagination;
     #[Locked]
     public int $storeId;
 
