@@ -370,21 +370,21 @@ new #[Title('Financial Analysis')] class extends Component {
             ->where('sales.status', 'completed')
             ->whereBetween('sales.sale_date', [$from, $to])
             ->when($this->filterStore !== '', fn($q) => $q->where('sales.store_id', $this->filterStore))
-            ->selectRaw(
-                '
+            ->selectRaw('
                 sale_items.product_id,
-                sale_items.product_name,
+                products.name as product_name,
                 SUM(sale_items.quantity) as total_qty,
                 SUM(sale_items.line_total) as total_revenue,
                 SUM(products.initial_price * sale_items.quantity) as total_cogs,
                 (SUM(sale_items.line_total) - SUM(products.initial_price * sale_items.quantity)) as gross_profit
-            ',
-            )
-            ->groupBy('sale_items.product_id', 'sale_items.product_name')
+            ')
+            ->groupBy('sale_items.product_id', 'products.name')
             ->orderByDesc('gross_profit')
             ->get()
             ->map(function ($row) {
-                $row->margin_pct = $row->total_revenue > 0 ? ($row->gross_profit / $row->total_revenue) * 100 : 0;
+                $row->margin_pct = $row->total_revenue > 0
+                    ? ($row->gross_profit / $row->total_revenue) * 100
+                    : 0;
                 return $row;
             });
 
