@@ -3,13 +3,15 @@
 namespace App\Providers;
 
 use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\Blade;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,6 +42,16 @@ class AppServiceProvider extends ServiceProvider
         });
         Gate::define('isAdminCashier', function ($user){
             return $user->role->id == 1 || $user->role->id == 2;
+        });
+        RateLimiter::for('password-change', function (Request $request) {
+            return Limit::perMinutes(15, 5)
+                ->by($request->user()?->id ?: $request->ip())
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'message' => 'Terlalu banyak percobaan. Coba lagi dalam 15 menit.',
+                        'retry_after' => (int) ($headers['Retry-After'] ?? 900),
+                    ], 429, $headers);
+                });
         });
     }
 
